@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AppBar, Toolbar, Typography, Button, Box, TextField, Paper, Card, CardContent, LinearProgress } from "@mui/material";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
@@ -49,6 +49,13 @@ function App() {
   const [input, setInput] = useState("");
   const [feedback, setFeedback] = useState(null);
   const [loading, setLoading] = useState(false);
+  const chatRef = useRef(null);
+
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const startInterview = () => {
     setMessages([{ role: "ai", text: "Can you introduce yourself?" }]);
@@ -60,7 +67,7 @@ function App() {
 
     const userMessage = { role: "user", text: input };
 
-    // ✅ capture correct values
+    // Capture correct values
     const currentInput = input;
     const currentHistory = [...messages, userMessage];
 
@@ -117,7 +124,7 @@ function App() {
       {/* Main */}
       <Box sx={{ display: "flex", flex: 1 }}>
         {/* Chat */}
-        <Box sx={{ flex: 2, p: 2, overflowY: "auto" }}>
+        <Box ref={chatRef} sx={{ flex: 2, p: 2, overflowY: "auto", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: 0, scrollBehavior: "smooth",}}>
           {messages.filter(Boolean).map((msg, idx) => (
             <Box
               key={idx}
