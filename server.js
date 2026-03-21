@@ -1,3 +1,4 @@
+import process from "node:process";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -9,15 +10,38 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const {
+  OPENAI_API_KEY,
+  OPENAI_PROJECT,
+  OPENAI_ORGANIZATION,
+  OPENAI_MODEL = "gpt-4o-mini",
+} = process.env;
+
+if (!OPENAI_API_KEY) {
+  console.warn("OPENAI_API_KEY is missing. OpenAI requests will fail until it is configured.");
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY,
+  project: OPENAI_PROJECT,
+  organization: OPENAI_ORGANIZATION,
 });
+
+function summarizeOpenAIError(err) {
+  return {
+    status: err?.status ?? err?.response?.status ?? null,
+    code: err?.code ?? err?.error?.code ?? null,
+    type: err?.type ?? err?.error?.type ?? null,
+    message: err?.message ?? "Unknown OpenAI error",
+    requestId: err?.request_id ?? err?.headers?.["x-request-id"] ?? null,
+  };
+}
 
 // Default fallback
 const DEFAULT_RESPONSE = {
   question:
-    "You mentioned your background — could you describe a specific project where you applied these skills?",
-  score: 7,
+    "Error processing your answer.",
+  score: 5,
   comment: "Clear but lacking details.",
   suggestion: "Add one concrete example.",
 };
@@ -53,17 +77,29 @@ Candidate answer: "${message}"
 
     try {
       const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: OPENAI_MODEL,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
+        response_format: { type: "json_object" },
       });
 
-      const raw = response.choices[0].message.content;
+      const raw = response.choices[0]?.message?.content;
       console.log("RAW AI RESPONSE:", raw);
+
+      if (!raw) {
+        throw new Error("OpenAI response did not include any message content.");
+      }
 
       parsed = JSON.parse(raw);
     } catch (err) {
-      console.warn("OpenAI call failed or response invalid, using default.", err.message);
+      const details = summarizeOpenAIError(err);
+      console.warn("OpenAI call failed or response invalid, using default.", details);
+
+      if (details.status === 429) {
+        console.warn(
+          "OpenAI returned HTTP 429. If your account has funds, verify that this API key belongs to the funded project and set OPENAI_PROJECT (and OPENAI_ORGANIZATION if needed).",
+        );
+      }
       // Parsed stays as DEFAULT_RESPONSE
     }
 
