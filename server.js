@@ -10,8 +10,17 @@ app.use(cors());
 app.use(express.json());
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Default fallback
+const DEFAULT_RESPONSE = {
+  question:
+    "You mentioned your background — could you describe a specific project where you applied these skills?",
+  score: 7,
+  comment: "Clear but lacking details.",
+  suggestion: "Add one concrete example.",
+};
 
 app.post("/api/response", async (req, res) => {
   console.log("Request received:", req.body);
@@ -35,31 +44,27 @@ Return this JSON ONLY:
 }
 
 Conversation:
-${history.map(h => `${h.role}: ${h.text}`).join("\n")}
+${history.map((h) => `${h.role}: ${h.text}`).join("\n")}
 
 Candidate answer: "${message}"
 `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-    });
+    let parsed = DEFAULT_RESPONSE;
 
-    const raw = response.choices[0].message.content;
-    console.log("RAW AI RESPONSE:", raw);
-
-    let parsed;
     try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+      });
+
+      const raw = response.choices[0].message.content;
+      console.log("RAW AI RESPONSE:", raw);
+
       parsed = JSON.parse(raw);
     } catch (err) {
-      parsed = {
-        question:
-          "You mentioned your background — could you describe a specific project where you applied these skills?",
-        score: 7,
-        comment: "Clear but lacking details.",
-        suggestion: "Add one concrete example.",
-      };
+      console.warn("OpenAI call failed or response invalid, using default.", err.message);
+      // Parsed stays as DEFAULT_RESPONSE
     }
 
     res.json({
@@ -68,14 +73,18 @@ Candidate answer: "${message}"
         score: parsed.score,
         comment: parsed.comment,
         suggestion: parsed.suggestion,
-      }
+      },
     });
-
   } catch (err) {
-    console.error("🔥 SERVER ERROR:", err);
-    res.status(500).json({
-      error: err.message,
-      stack: err.stack,
+    console.error("SERVER ERROR: ", err);
+    // Fallback to default in case of unexpected server errors
+    res.json({
+      aiMessage: { role: "ai", text: DEFAULT_RESPONSE.question },
+      feedback: {
+        score: DEFAULT_RESPONSE.score,
+        comment: DEFAULT_RESPONSE.comment,
+        suggestion: DEFAULT_RESPONSE.suggestion,
+      },
     });
   }
 });

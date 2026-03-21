@@ -1,5 +1,48 @@
 import { useState } from "react";
 import { AppBar, Toolbar, Typography, Button, Box, TextField, Paper, Card, CardContent, LinearProgress } from "@mui/material";
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#303030',
+    },
+    background: {
+      default: '#121212',
+      paper: '#1e1e1e',
+    },
+  },
+  typography: {
+    fontFamily: 'Inter, sans-serif',
+  },
+});
+
+function ScoreBar({ score }) {
+  // score is 0-10
+  const getColor = (score) => {
+    if (score <= 4) return "#f44336";
+    if (score <= 7) return "#ff9800";
+    return "#4caf50";
+  };
+
+  return (
+    <LinearProgress
+      variant="determinate"
+      value={score * 10}
+      sx={{
+        my: 1,
+        height: 5,
+        borderRadius: 5,
+        "& .MuiLinearProgress-bar": {
+          backgroundColor: getColor(score),
+        },
+        backgroundColor: "black", // gray track
+      }}
+    />
+  );
+}
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -56,12 +99,14 @@ function App() {
   };
 
   return (
-    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", }}>
-      {/* Header */}
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "left" }}>
-            AI Interview Simulation
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", }}>
+        {/* Header */}
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "left" }}>
+            AI INTERVIEW SIMULATOR
           </Typography>
           <Button color="inherit" onClick={startInterview}>
             Start
@@ -97,11 +142,11 @@ function App() {
             </Box>
           ))}
 
-          {loading && <Typography>AI is typing...</Typography>}
+          {loading && <Typography>AI is asking...</Typography>}
         </Box>
 
         {/* Feedback */}
-        <Box sx={{ flex: 1, p: 2, borderLeft: "1px solid #ddd" }}>
+        <Box sx={{ flex: 1, p: 2, borderLeft: "1px solid black" }}>
           <Card>
             <CardContent>
               <Typography variant="h6">Feedback</Typography>
@@ -109,20 +154,16 @@ function App() {
               {feedback ? (
                 <>
                   <Typography sx={{ mt: 2 }}>
-                    Score: {feedback.score}/10
+                    <strong>Score: {feedback.score}</strong>/10
                   </Typography>
 
-                  <LinearProgress
-                    variant="determinate"
-                    value={feedback.score * 10}
-                    sx={{ my: 1 }}
-                  />
+                  <ScoreBar score={feedback.score}/>
 
-                  <Typography>
+                  <Typography sx={{ textAlign: "left", mb: 1 }}> 
                     <strong>Comment:</strong> {feedback.comment}
                   </Typography>
 
-                  <Typography>
+                  <Typography sx={{ textAlign: "left", mb: 1 }}>
                     <strong>Suggestion:</strong> {feedback.suggestion}
                   </Typography>
                 </>
@@ -137,7 +178,7 @@ function App() {
       </Box>
 
       {/* Input */}
-      <Box sx={{ display: "flex", p: 2, borderTop: "1px solid #ddd"}}>
+      <Box sx={{ display: "flex", p: 2, borderTop: "1px solid black"}}>
         <TextField
           fullWidth
           variant="outlined"
@@ -147,10 +188,11 @@ function App() {
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
         <Button variant="contained" sx={{ ml: 2, bgcolor: "primary.main" }} onClick={handleSend}>
-          Send
+          <ArrowForwardIcon />
         </Button>
       </Box>
     </Box>
+    </ThemeProvider>
   );
 }
 

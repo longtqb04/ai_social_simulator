@@ -182,3 +182,19 @@
     border-right-color: var(--border);
   }
 }
+
+:root {
+  --accent: #90caf9;
+  --accent-bg: rgba(144, 202, 249, 0.1);
+  --accent-border: #42a5f5;
+  --text-h: #ffffff;
+  --social-bg: #272727;
+  --border: #333333;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+body {
+  background-color: #121212;
+  color: white;
+  margin: 0;
+}

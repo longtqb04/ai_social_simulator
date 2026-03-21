@@ -14,6 +14,7 @@
     "@dotenvx/dotenvx": "^1.57.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.9",
     "@mui/material": "^7.3.9",
     "@openai/codex-sdk": "^0.116.0",
     "aws-sdk": "^2.1693.0",
