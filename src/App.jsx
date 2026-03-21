@@ -16,24 +16,42 @@ function App() {
     if (!input.trim()) return;
 
     const userMessage = { role: "user", text: input };
+
+    // ✅ capture correct values
+    const currentInput = input;
+    const currentHistory = [...messages, userMessage];
+
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
-    setTimeout( async () => {
-      const res = await fetch("/api/respond", {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: input, history: messages }),
-      });
+    setTimeout(async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/response", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: currentInput,
+            history: currentHistory,
+          }),
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      setMessages((prev) => [...prev, data.aiMessage]);
-      setFeedback(data.feedback);
-      setLoading(false);
+        setMessages((prev) => [...prev, data.aiMessage]);
+        setFeedback(data.feedback);
+      } catch (err) {
+        console.error("Frontend error:", err);
+
+        setMessages((prev) => [
+          ...prev,
+          { role: "ai", text: "Error contacting server." },
+        ]);
+      } finally {
+        setLoading(false);
+      }
     }, 1000);
   };
 
@@ -43,7 +61,7 @@ function App() {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "left" }}>
-            AI Interview Simulator
+            AI Interview Simulation
           </Typography>
           <Button color="inherit" onClick={startInterview}>
             Start
@@ -55,13 +73,12 @@ function App() {
       <Box sx={{ display: "flex", flex: 1 }}>
         {/* Chat */}
         <Box sx={{ flex: 2, p: 2, overflowY: "auto" }}>
-          {messages.map((msg, idx) => (
+          {messages.filter(Boolean).map((msg, idx) => (
             <Box
               key={idx}
               sx={{
                 display: "flex",
-                justifyContent:
-                  msg.role === "user" ? "flex-end" : "flex-start",
+                justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
                 mb: 1
               }}
             >

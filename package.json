@@ -10,13 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@cloudflare/ai": "^1.2.2",
     "@dotenvx/dotenvx": "^1.57.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.9",
+    "@openai/codex-sdk": "^0.116.0",
+    "aws-sdk": "^2.1693.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "mustache": "^4.2.0",
     "node-fetch": "^3.3.2",
     "openai": "^6.32.0",
     "react": "^19.2.4",
