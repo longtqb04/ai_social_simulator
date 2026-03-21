@@ -64,7 +64,7 @@ Candidate answer:
     } catch (err) {
       console.error("JSON Parse Error:", err.message);
 
-      // fallback (important for demo stability)
+      // fallback
       parsed = {
         question:
           "You mentioned your interest in AI—can you describe a specific project where you applied machine learning?",
