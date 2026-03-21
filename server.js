@@ -11,28 +11,32 @@ app.use(cors());
 app.use(express.json());
 
 const {
-  OPENAI_API_KEY,
-  OPENAI_PROJECT,
-  OPENAI_ORGANIZATION,
-  OPENAI_MODEL = "gpt-4o-mini",
+  OPENROUTER_KEY,
+  OPENROUTER_SITE_URL,
+  OPENROUTER_APP_NAME = "ai_social_simulator",
+  OPENROUTER_MODEL = "openai/gpt-4o-mini",
 } = process.env;
 
-if (!OPENAI_API_KEY) {
-  console.warn("OPENAI_API_KEY is missing. OpenAI requests will fail until it is configured.");
+if (!OPENROUTER_KEY) {
+  console.warn("OPENROUTER_KEY is missing. OpenRouter requests will fail until it is configured.");
 }
 
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-  project: OPENAI_PROJECT,
-  organization: OPENAI_ORGANIZATION,
+const openrouter = new OpenAI({
+  apiKey: OPENROUTER_KEY,
+  baseURL: "https://openrouter.ai/api/v1",
+  defaultHeaders: {
+    ...(OPENROUTER_SITE_URL ? { "HTTP-Referer": OPENROUTER_SITE_URL } : {}),
+    ...(OPENROUTER_APP_NAME ? { "X-Title": OPENROUTER_APP_NAME } : {}),
+  },
 });
 
 function summarizeOpenAIError(err) {
   return {
+    provider: "openrouter",
     status: err?.status ?? err?.response?.status ?? null,
     code: err?.code ?? err?.error?.code ?? null,
     type: err?.type ?? err?.error?.type ?? null,
-    message: err?.message ?? "Unknown OpenAI error",
+    message: err?.message ?? "Unknown OpenRouter error",
     requestId: err?.request_id ?? err?.headers?.["x-request-id"] ?? null,
   };
 }
@@ -76,8 +80,8 @@ Candidate answer: "${message}"
     let parsed = DEFAULT_RESPONSE;
 
     try {
-      const response = await openai.chat.completions.create({
-        model: OPENAI_MODEL,
+      const response = await openrouter.chat.completions.create({
+        model: OPENROUTER_MODEL,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
         response_format: { type: "json_object" },

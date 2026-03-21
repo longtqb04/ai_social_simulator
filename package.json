@@ -17,6 +17,7 @@
     "@mui/icons-material": "^7.3.9",
     "@mui/material": "^7.3.9",
     "@openai/codex-sdk": "^0.116.0",
+    "@openrouter/sdk": "^0.9.11",
     "aws-sdk": "^2.1693.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
