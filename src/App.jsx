@@ -1,121 +1,140 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
+import { AppBar, Toolbar, Typography, Button, Box, TextField, Paper, Card, CardContent, LinearProgress } from "@mui/material";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const startInterview = () => {
+    setMessages([{ role: "ai", text: "Can you introduce yourself?" }]);
+    setFeedback(null);
+  };
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+
+    const userMessage = { role: "user", text: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setLoading(true);
+
+    setTimeout( async () => {
+      const res = await fetch("/api/respond", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: input, history: messages }),
+      });
+
+      const data = await res.json();
+
+      setMessages((prev) => [...prev, data.aiMessage]);
+      setFeedback(data.feedback);
+      setLoading(false);
+    }, 1000);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", }}>
+      {/* Header */}
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "left" }}>
+            AI Interview Simulator
+          </Typography>
+          <Button color="inherit" onClick={startInterview}>
+            Start
+          </Button>
+        </Toolbar>
+      </AppBar>
 
-      <div className="ticks"></div>
+      {/* Main */}
+      <Box sx={{ display: "flex", flex: 1 }}>
+        {/* Chat */}
+        <Box sx={{ flex: 2, p: 2, overflowY: "auto" }}>
+          {messages.map((msg, idx) => (
+            <Box
+              key={idx}
+              sx={{
+                display: "flex",
+                justifyContent:
+                  msg.role === "user" ? "flex-end" : "flex-start",
+                mb: 1
+              }}
+            >
+              <Paper
+                sx={{
+                  p: 1.5,
+                  maxWidth: "60%",
+                  bgcolor: msg.role === "user" ? "primary.main" : "grey.200",
+                  color: msg.role === "user" ? "white" : "black",
+                  borderRadius: 5,
+                  textAlign: "left"
+                }}
+              >
+                {msg.text}
+              </Paper>
+            </Box>
+          ))}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          {loading && <Typography>AI is typing...</Typography>}
+        </Box>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* Feedback */}
+        <Box sx={{ flex: 1, p: 2, borderLeft: "1px solid #ddd" }}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Feedback</Typography>
+
+              {feedback ? (
+                <>
+                  <Typography sx={{ mt: 2 }}>
+                    Score: {feedback.score}/10
+                  </Typography>
+
+                  <LinearProgress
+                    variant="determinate"
+                    value={feedback.score * 10}
+                    sx={{ my: 1 }}
+                  />
+
+                  <Typography>
+                    <strong>Comment:</strong> {feedback.comment}
+                  </Typography>
+
+                  <Typography>
+                    <strong>Suggestion:</strong> {feedback.suggestion}
+                  </Typography>
+                </>
+              ) : (
+                <Typography color="text.secondary">
+                  No feedback yet
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
+
+      {/* Input */}
+      <Box sx={{ display: "flex", p: 2, borderTop: "1px solid #ddd"}}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Type your answer..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+        />
+        <Button variant="contained" sx={{ ml: 2, bgcolor: "primary.main" }} onClick={handleSend}>
+          Send
+        </Button>
+      </Box>
+    </Box>
+  );
 }
 
-export default App
+export default App;
