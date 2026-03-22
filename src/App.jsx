@@ -44,28 +44,6 @@ function ScoreBar({ score }) {
   );
 }
 
-const endInterview = async () => {
-  setInterviewActive(false);
-  setLoading(true);
-
-  try {
-    const res = await fetch("http://localhost:3000/api/end", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ history: messages }),
-    });
-
-    const data = await res.json();
-    setFinalSummary(data.summary);
-  } catch (err) {
-    console.error("End interview error:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
 const TypingDots = () => (
   <Box sx={{
     display: "flex",
@@ -116,6 +94,28 @@ function App() {
   const [mode, setMode] = useState("behavioral");
   const [interviewActive, setInterviewActive] = useState(false);
   const [finalSummary, setFinalSummary] = useState(null);
+
+  const endInterview = async () => {
+    setInterviewActive(false);
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:3000/api/end", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ history: messages }),
+      });
+
+      const data = await res.json();
+      setFinalSummary(data.summary);
+    } catch (err) {
+      console.error("End interview error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (chatRef.current) {
