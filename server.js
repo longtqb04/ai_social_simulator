@@ -53,28 +53,54 @@ const DEFAULT_RESPONSE = {
 app.post("/api/response", async (req, res) => {
   console.log("Request received:", req.body);
 
-  const { message, history = [] } = req.body;
+  const { message, history = [], mode = "behavioral" } = req.body;
 
   try {
-    const prompt = `
-You are an AI interview coach for software engineering roles.
+const prompt = `
+You are an AI interviewer.
 
-Your task:
-- Ask ONE specific follow-up question
-- Evaluate the candidate's answer
+INTERVIEW MODE: ${mode.toUpperCase()}
 
-Return this JSON ONLY:
+Your tasks:
+1. Ask ONE specific follow-up question.
+2. Give a brief evaluation.
+
+Rules:
+- DO NOT ask generic questions.
+- Use the candidate’s answer + conversation history.
+- Tailor questions to the selected mode.
+
+Here is what each mode means:
+
+BEHAVIORAL:
+- Ask about teamwork, conflict, ownership, leadership, deadlines.
+- Use STAR-style questions.
+
+TECHNICAL:
+- Ask about algorithms, debugging, time complexity, implementations.
+
+SYSTEM_DESIGN:
+- Ask about scalability, tradeoffs, architecture, bottlenecks.
+
+FRONTEND:
+- Ask about React, performance, rendering, event handling, UI problems.
+
+BACKEND:
+- Ask about APIs, databases, caching, authentication, concurrency.
+
+Conversation history:
+${history.map(h => `${h.role}: ${h.text}`).join("\n")}
+
+Candidate answer:
+"${message}"
+
+Return ONLY JSON:
 {
-  "question": "text",
-  "score": number (0-10),
-  "comment": "short feedback",
-  "suggestion": "improvement tip"
+  "question": "...",
+  "score": number,
+  "comment": "...",
+  "suggestion": "..."
 }
-
-Conversation:
-${history.map((h) => `${h.role}: ${h.text}`).join("\n")}
-
-Candidate answer: "${message}"
 `;
 
     let parsed = DEFAULT_RESPONSE;
@@ -126,6 +152,43 @@ Candidate answer: "${message}"
         suggestion: DEFAULT_RESPONSE.suggestion,
       },
     });
+  }
+});
+
+app.post("/api/end", async (req, res) => {
+  const { history } = req.body;
+
+  const prompt = `
+You are an AI interviewer. The interview has ended.
+
+Conversation history:
+${history.map(m => `${m.role}: ${m.text}`).join("\n")}
+
+Provide a summary in JSON ONLY:
+{
+  "score": number (0-10),
+  "strengths": "text",
+  "weaknesses": "text",
+  "verdict": "Hire / Consider / No hire"
+}
+`;
+
+  try {
+    const response = await openrouter.chat.completions.create({
+      model: OPENROUTER_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      response_format: { type: "json_object" },
+    });
+
+    const raw = response.choices[0]?.message?.content;
+    const parsed = JSON.parse(raw);
+
+    res.json({ summary: parsed });
+
+  } catch (err) {
+    console.error("END error:", err);
+    res.status(500).json({ error: "Failed to end interview." });
   }
 });
 
