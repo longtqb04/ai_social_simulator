@@ -1,8 +1,8 @@
-## AI Interview Simulator
+# AI Interview Simulator
 
 An AI-powered interview practice platform that simulates real interview experiences with adaptive questioning, real-time feedback, and personalized evaluation.
 
-# Overview
+## Overview
 
 The AI Interview Simulator helps users practice job interviews in a realistic, interactive environment.
 
@@ -18,11 +18,11 @@ Backend: Node.js, Express, REST API
 AI: OpenRouter (LLM provider)
 File handling: Multer (file upload), pdf-parse (resume extraction)
 
-# Author
+## Author
 Tran Quoc Bao Long
 Computer Science student @ HCMUT
 
-# Acknowledgements
+## Acknowledgements
 Built during LotusHacks 2026
 Inspired by real-world interview challenges
 Thanks to the open-source and AI communities
