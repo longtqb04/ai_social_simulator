@@ -20,9 +20,12 @@ File handling: Multer (file upload), pdf-parse (resume extraction)
 
 ## Author
 Tran Quoc Bao Long
+
 Computer Science student @ HCMUT
 
 ## Acknowledgements
 Built during LotusHacks 2026
+
 Inspired by real-world interview challenges
+
 Thanks to the open-source and AI communities
