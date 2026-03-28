@@ -1,18 +1,28 @@
-# React + Vite
+## AI Interview Simulator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An AI-powered interview practice platform that simulates real interview experiences with adaptive questioning, real-time feedback, and personalized evaluation.
 
-Currently, two official plugins are available:
+# Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The AI Interview Simulator helps users practice job interviews in a realistic, interactive environment.
 
-## React Compiler
+- Listens to your answers
+- Asks context-aware follow-up questions
+- Evaluates your responses
+- Provides actionable feedback
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Supports multiple interview types (Behavioral, Technical, System Design, FE, BE, AI) and can optionally use your resume to generate personalized questions.
 
-Note: This will impact Vite dev & build performances.
+Frontend: React (Vite)
+Backend: Node.js, Express, REST API
+AI: OpenRouter (LLM provider)
+File handling: Multer (file upload), pdf-parse (resume extraction)
 
-## Expanding the ESLint configuration
+# Author
+Tran Quoc Bao Long
+Computer Science student @ HCMUT
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Acknowledgements
+Built during LotusHacks 2026
+Inspired by real-world interview challenges
+Thanks to the open-source and AI communities
